@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monster Clicker Adventure</title>
+    <!-- Import Retro Pixel Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        /* RPG Dark Palette */
+        --bg-dark: #0f0e13;
+        --bg-panel: #1a1921;
+        --bg-panel-light: #252430;
+        --accent-gold: #f59e0b; /* Gold for UI */
+        --accent-red: #ef4444; /* Red for Health/Action */
+        --text-main: #e2e8f0;
+        --text-muted: #94a3b8;
+        --border: #333340;
+        --font-pixel: "VT323", monospace;
+        --font-body: "Inter", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        font-family: var(--font-body);
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-image: radial-gradient(
+            circle at 15% 50%,
+            rgba(245, 158, 11, 0.05) 0%,
+            transparent 25%
+          ),
+          radial-gradient(
+            circle at 85% 30%,
+            rgba(239, 68, 68, 0.05) 0%,
+            transparent 25%
+          );
+      }
+
+      /* GRID LAYOUT */
+      .container {
+        width: 100%;
+        height: 100%;
+        max-width: 1920px;
+        max-height: 1080px;
+        padding: 1.5rem;
+        display: grid;
+        grid-template-columns: 300px 1fr 300px; /* Sidebar, Main, Sidebar */
+        grid-template-rows: 80px 1fr 220px; /* Header, Main, Bottom Strip */
+        gap: 1rem;
+      }
+
+      /* Generic Panel Style */
+      .panel {
+        background: var(--bg-panel);
+        border: 2px solid var(--border);
+        border-radius: 4px; /* Sharper corners for retro feel */
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        position: relative;
+      }
+
+      /* Retro Header Text */
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-pixel);
+        letter-spacing: 1px;
+      }
+
+      /* 1. HEADER (Spans Top) */
+      .header {
+        grid-column: 1 / 4;
+        grid-row: 1 / 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg-panel-light);
+        border-color: var(--accent-gold);
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .logo-thumb {
+        width: 50px;
+        height: 50px;
+        border-radius: 4px;
+        border: 2px solid var(--text-muted);
+        object-fit: cover;
+      }
+      .game-title {
+        font-size: 2.5rem;
+        color: var(--accent-gold);
+        text-shadow: 2px 2px 0px #000;
+        line-height: 1;
+      }
+      .version-tag {
+        background: var(--accent-red);
+        color: white;
+        padding: 2px 8px;
+        font-family: var(--font-pixel);
+        font-size: 1.2rem;
+        border-radius: 2px;
+      }
+
+      /* 2. LEFT COLUMN (Info) */
+      .left-col {
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+        gap: 1rem;
+      }
+
+      .description-box {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--font-pixel);
+        font-size: 1.4rem;
+      }
+      .stat-val {
+        color: var(--accent-gold);
+      }
+
+      .tech-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: auto;
+      }
+      .tech-pill {
+        background: #333;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        border: 1px solid #555;
+        color: #aaa;
+        border-radius: 4px;
+      }
+      .tech-pill.highlight {
+        border-color: var(--accent-gold);
+        color: var(--accent-gold);
+      }
+
+      /* 3. CENTER (Main Gameplay) */
+      .main-stage {
+        grid-column: 2 / 3;
+        grid-row: 2 / 3;
+        border-color: var(--text-muted);
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      .main-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Ensures the whole game window is seen */
+        cursor: zoom-in;
+      }
+      .stage-label {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid var(--accent-red);
+        padding: 5px 15px;
+        font-family: var(--font-pixel);
+        font-size: 1.2rem;
+        color: var(--accent-red);
+      }
+
+      /* 4. RIGHT COLUMN (Team & Features) */
+      .right-col {
+        grid-column: 3 / 4;
+        grid-row: 2 / 3;
+      }
+
+      .section-title {
+        color: var(--text-main);
+        font-size: 1.5rem;
+        border-bottom: 2px solid var(--border);
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+      }
+
+      .feature-list {
+        list-style: none;
+        font-size: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      .feature-list li {
+        display: flex;
+        gap: 8px;
+      }
+      .feature-icon {
+        color: var(--accent-gold);
+      }
+
+      .team-section {
+        margin-top: auto;
+        border-top: 1px solid var(--border);
+        padding-top: 1rem;
+      }
+      .team-member {
+        font-family: var(--font-pixel);
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+      }
+      .role {
+        font-family: var(--font-body);
+        font-size: 0.7rem;
+        background: #333;
+        padding: 2px 4px;
+        border-radius: 3px;
+        margin-left: auto;
+      }
+
+      /* 5. BOTTOM (Gallery Strip) */
+      .gallery-strip {
+        grid-column: 1 / 4;
+        grid-row: 3 / 4;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .gallery-card {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        /* Enforce 4:3 Aspect Ratio Logic visually */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem;
+      }
+
+      .gallery-card img {
+        max-width: 100%;
+        max-height: 100%;
+        /* Tries to respect 4:3ish boxes */
+        aspect-ratio: 4/3;
+        object-fit: contain;
+        background: #000;
+        border: 1px solid #333;
+        cursor: zoom-in;
+        transition: transform 0.2s;
+      }
+      .gallery-card:hover {
+        border-color: var(--accent-gold);
+      }
+      .gallery-card:hover img {
+        transform: scale(1.02);
+      }
+
+      .caption {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: black;
+        color: white;
+        font-family: var(--font-pixel);
+        font-size: 1rem;
+        padding: 2px 6px;
+        border: 1px solid white;
+      }
+
+      /* Lightbox */
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 1000;
+      }
+      .lightbox.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .lightbox img {
+        max-width: 95vw;
+        max-height: 95vh;
+        box-shadow: 0 0 20px var(--accent-gold);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="panel header">
+        <div class="logo-area">
+          <!-- Title Screen Thumbnail as Logo -->
+          <img
+            src="https://i.imgur.com/F4z6zq9.png"
+            class="logo-thumb"
+            alt="Icon"
+          />
+          <div>
+            <div class="game-title">MONSTER CLICKER ADVENTURE</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted)">
+              JAVAFX PROJECT • ADJ GROUP
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center"></div>
+      </div>
+
+      <!-- LEFT COLUMN -->
+      <div class="panel left-col">
+        <h2 class="section-title" style="color: var(--accent-gold)">
+          Game Stats
+        </h2>
+
+        <div class="stat-row">
+          <span>Monsters</span> <span class="stat-val">50+</span>
+        </div>
+        <div class="stat-row">
+          <span>Bosses</span> <span class="stat-val">11</span>
+        </div>
+        <div class="stat-row">
+          <span>Levels</span> <span class="stat-val">10+</span>
+        </div>
+        <div class="stat-row">
+          <span>Dev Time</span> <span class="stat-val">60h</span>
+        </div>
+
+        <p class="description-box" style="margin-top: 1rem">
+          A retro-styled idle RPG built from scratch. Journey through pixel
+          realms, battle waves of enemies, and upgrade your gear using a
+          custom-built persistence system.
+        </p>
+
+        <div class="tech-list">
+          <span class="tech-pill highlight">Java 21</span>
+          <span class="tech-pill highlight">JavaFX</span>
+          <span class="tech-pill">Gradle</span>
+          <span class="tech-pill">Python Scripts</span>
+          <span class="tech-pill">JSON Save</span>
+        </div>
+      </div>
+
+      <!-- CENTER STAGE (Gameplay) -->
+      <div class="panel main-stage">
+        <img
+          src="https://i.imgur.com/MRQHZ0M.png"
+          class="main-img zoomable"
+          alt="Main Gameplay"
+        />
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="panel right-col">
+        <h2 class="section-title">Key Features</h2>
+        <ul class="feature-list">
+          <li><span class="feature-icon">▶</span> Custom Audio Engine</li>
+          <li><span class="feature-icon">▶</span> Python Asset Pipeline</li>
+          <li><span class="feature-icon">▶</span> Nearest Neighbor Upscale</li>
+          <li><span class="feature-icon">▶</span> Save/Load System</li>
+          <li><span class="feature-icon">▶</span> Animated Sprite Logic</li>
+        </ul>
+
+        <div class="team-section">
+          <h2 class="section-title" style="font-size: 1.2rem">Developers</h2>
+          <div class="team-member">
+            Adam Larsh <span class="role">Logic</span>
+          </div>
+          <div class="team-member">
+            Dillon Bell <span class="role">UI/Audio</span>
+          </div>
+          <div class="team-member">
+            Joshua Zhang <span class="role">Assets</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM GALLERY STRIP -->
+      <div class="gallery-strip">
+        <!-- Shop Image -->
+        <div class="gallery-card">
+          <img
+            src="https://i.imgur.com/TdTGYBF.png"
+            class="zoomable"
+            alt="Item Shop"
+          />
+          <div class="caption">ITEM SHOP</div>
+        </div>
+
+        <!-- Settings Image -->
+        <div class="gallery-card">
+          <img
+            src="https://i.imgur.com/2rzjHHu.png"
+            class="zoomable"
+            alt="Settings"
+          />
+          <div class="caption">SETTINGS</div>
+        </div>
+
+        <!-- Credits Image -->
+        <div class="gallery-card">
+          <img
+            src="https://i.imgur.com/LEbEj5Z.png"
+            class="zoomable"
+            alt="Credits"
+          />
+          <div class="caption">CREDITS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox">
+      <img id="lightbox-img" src="" alt="Zoom" />
+    </div>
+
+    <script>
+      const lightbox = document.getElementById("lightbox");
+      const lightboxImg = document.getElementById("lightbox-img");
+
+      document.querySelectorAll(".zoomable").forEach((img) => {
+        img.addEventListener("click", () => {
+          lightboxImg.src = img.src;
+          lightbox.classList.add("active");
+        });
+      });
+
+      lightbox.addEventListener("click", () => {
+        lightbox.classList.remove("active");
+      });
+    </script>
+  </body>
+</html>
